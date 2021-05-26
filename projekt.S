@@ -5,20 +5,11 @@
 #define um_pro_sample 3573 * 2
 #define SIG_LEN 10
 
-#define N0 91
-#define N1 72
-#define N2 44
-#define N3 25
-#define N4 33
-#define N5 81
-#define N6 11
-#define N7 55
-
 level_str: .string "Level: "
 final_str: .string "You've won the game!"
 
 .align 2;
-freqn_array: .short N0, N1, N2, N3, N4, N5, N6, N7
+freqn_array: .short 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85
 
 .align 2;
 
@@ -69,7 +60,7 @@ roundForNextLevel: .short 0
 #define tryDecrementPerLevel 2
 #define Level1Rounds 1
 #define RoundIncrementPerLevel 1
-#define FinalWinRounds 7
+#define FinalWinRounds 9 //7
 
 .text
 init:	
@@ -78,7 +69,7 @@ init:
 	call 	initx;
 	R0 = 1; // USE MIC IN
 	call inicodec;
-
+start:
 	//Read mic input to get a random seed
 	call rxsport;
 	P0.L = old_random;
@@ -105,6 +96,12 @@ init:
 	R0 = initialMaxTries (Z);
 	W[P0] = R0;
 
+	P4.L = round;
+	P4.H = round;
+
+	R0 = 0(Z);
+	W[P4] = R0;
+
 	jump mloop;
 
 test_loop:
@@ -123,7 +120,7 @@ test_loop:
 mloop:
 	//Make random tone
 	call random;
-	R1 = 7(Z);
+	R1 = 0xF(Z);
 	R0 = R0 & R1; //Extract lower two bits
 
 	R0 <<= 1;	
@@ -282,8 +279,7 @@ skip_hundred:
 	P3.H = level_length;
 
 	call play_track;
-	
-	jump init;
+	jump start;
 
 skip_final_win:
 	P0.L = level_str;
